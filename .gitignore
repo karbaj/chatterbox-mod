@@ -1,5 +1,14 @@
 .vscode
 
+# app.py related
+*.m4a
+venv/
+presets.json
+history/
+app.log
+outputs/
+
+
 # Pylance
 pyrightconfig.json
 

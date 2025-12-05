@@ -1,11 +1,11 @@
 """
 Chatterbox TTS - Enterprise Gradio WebUI v3
 ============================================
-新增功能:
-- 自定义预设保存/删除
-- 隐身模式（不保存记录/文件/日志）
+New Features:
+- Custom preset save/delete
+- Incognito mode (no history/files/logs saved)
 
-环境: RTX 5070 Ti + CUDA 13 + PyTorch 2.9.1
+Environment: RTX 5070 Ti + CUDA 13 + PyTorch 2.9.1
 """
 
 import gradio as gr
@@ -23,7 +23,7 @@ from typing import Optional, Tuple, List
 from dataclasses import dataclass
 from threading import Lock
 
-# ==================== 配置 ====================
+# ==================== Configuration ====================
 
 
 @dataclass
@@ -41,11 +41,11 @@ class AppConfig:
 
 CONFIG = AppConfig()
 
-# ==================== 日志（支持隐身模式）====================
+# ==================== Logging (Supports Incognito Mode) ====================
 
 
 class ConditionalLogger:
-    """条件日志器 - 支持隐身模式"""
+    """Conditional logger - supports incognito mode"""
 
     def __init__(self):
         self._enabled = True
@@ -56,7 +56,7 @@ class ConditionalLogger:
         self._logger.addHandler(handler)
         self._logger.setLevel(logging.INFO)
 
-        # 文件日志
+        # File logging
         self._file_handler = None
         self._enable_file_logging()
 
@@ -75,7 +75,7 @@ class ConditionalLogger:
             self._file_handler = None
 
     def set_incognito(self, enabled: bool):
-        """设置隐身模式"""
+        """Set incognito mode"""
         self._enabled = not enabled
         if enabled:
             self._disable_file_logging()
@@ -87,60 +87,60 @@ class ConditionalLogger:
             self._logger.info(msg)
 
     def error(self, msg, **kwargs):
-        # 错误始终记录到控制台
+        # Errors are always logged to console
         self._logger.error(msg, **kwargs)
 
 
 logger = ConditionalLogger()
 
-# ==================== 语言配置 ====================
+# ==================== Language Configuration ====================
 LANGUAGES = {
-    "English (英语)": {"code": "en", "flag": "🇺🇸", "multilingual": False},
-    "中文 (Chinese)": {"code": "zh", "flag": "🇨🇳", "multilingual": True},
-    "日本語 (Japanese)": {"code": "ja", "flag": "🇯🇵", "multilingual": True},
-    "한국어 (Korean)": {"code": "ko", "flag": "🇰🇷", "multilingual": True},
-    "Français (French)": {"code": "fr", "flag": "🇫🇷", "multilingual": True},
-    "Deutsch (German)": {"code": "de", "flag": "🇩🇪", "multilingual": True},
-    "Español (Spanish)": {"code": "es", "flag": "🇪🇸", "multilingual": True},
-    "Italiano (Italian)": {"code": "it", "flag": "🇮🇹", "multilingual": True},
-    "Português (Portuguese)": {"code": "pt", "flag": "🇵🇹", "multilingual": True},
-    "Русский (Russian)": {"code": "ru", "flag": "🇷🇺", "multilingual": True},
-    "العربية (Arabic)": {"code": "ar", "flag": "🇸🇦", "multilingual": True},
-    "Nederlands (Dutch)": {"code": "nl", "flag": "🇳🇱", "multilingual": True},
-    "Polski (Polish)": {"code": "pl", "flag": "🇵🇱", "multilingual": True},
-    "हिन्दी (Hindi)": {"code": "hi", "flag": "🇮🇳", "multilingual": True},
-    "Türkçe (Turkish)": {"code": "tr", "flag": "🇹🇷", "multilingual": True},
-    "Svenska (Swedish)": {"code": "sv", "flag": "🇸🇪", "multilingual": True},
-    "Dansk (Danish)": {"code": "da", "flag": "🇩🇰", "multilingual": True},
-    "Suomi (Finnish)": {"code": "fi", "flag": "🇫🇮", "multilingual": True},
-    "Norsk (Norwegian)": {"code": "no", "flag": "🇳🇴", "multilingual": True},
-    "Ελληνικά (Greek)": {"code": "el", "flag": "🇬🇷", "multilingual": True},
-    "עברית (Hebrew)": {"code": "he", "flag": "🇮🇱", "multilingual": True},
-    "Bahasa Melayu (Malay)": {"code": "ms", "flag": "🇲🇾", "multilingual": True},
-    "Kiswahili (Swahili)": {"code": "sw", "flag": "🇰🇪", "multilingual": True},
+    "English": {"code": "en", "flag": "🇺🇸", "multilingual": False},
+    "Chinese (中文)": {"code": "zh", "flag": "🇨🇳", "multilingual": True},
+    "Japanese (日本語)": {"code": "ja", "flag": "🇯🇵", "multilingual": True},
+    "Korean (한국어)": {"code": "ko", "flag": "🇰🇷", "multilingual": True},
+    "French (Français)": {"code": "fr", "flag": "🇫🇷", "multilingual": True},
+    "German (Deutsch)": {"code": "de", "flag": "🇩🇪", "multilingual": True},
+    "Spanish (Español)": {"code": "es", "flag": "🇪🇸", "multilingual": True},
+    "Italian (Italiano)": {"code": "it", "flag": "🇮🇹", "multilingual": True},
+    "Portuguese (Português)": {"code": "pt", "flag": "🇵🇹", "multilingual": True},
+    "Russian (Русский)": {"code": "ru", "flag": "🇷🇺", "multilingual": True},
+    "Arabic (العربية)": {"code": "ar", "flag": "🇸🇦", "multilingual": True},
+    "Dutch (Nederlands)": {"code": "nl", "flag": "🇳🇱", "multilingual": True},
+    "Polish (Polski)": {"code": "pl", "flag": "🇵🇱", "multilingual": True},
+    "Hindi (हिन्दी)": {"code": "hi", "flag": "🇮🇳", "multilingual": True},
+    "Turkish (Türkçe)": {"code": "tr", "flag": "🇹🇷", "multilingual": True},
+    "Swedish (Svenska)": {"code": "sv", "flag": "🇸🇪", "multilingual": True},
+    "Danish (Dansk)": {"code": "da", "flag": "🇩🇰", "multilingual": True},
+    "Finnish (Suomi)": {"code": "fi", "flag": "🇫🇮", "multilingual": True},
+    "Norwegian (Norsk)": {"code": "no", "flag": "🇳🇴", "multilingual": True},
+    "Greek (Ελληνικά)": {"code": "el", "flag": "🇬🇷", "multilingual": True},
+    "Hebrew (עברית)": {"code": "he", "flag": "🇮🇱", "multilingual": True},
+    "Malay (Bahasa Melayu)": {"code": "ms", "flag": "🇲🇾", "multilingual": True},
+    "Swahili (Kiswahili)": {"code": "sw", "flag": "🇰🇪", "multilingual": True},
 }
 
-# 默认预设
+# Default presets
 DEFAULT_PRESETS = {
-    "默认 (Balanced)": {"exaggeration": 0.5, "cfg_weight": 0.5, "temperature": 1.0, "description": "平衡设置，适合大多数场景", "builtin": True},
-    "新闻播报 (News)": {"exaggeration": 0.2, "cfg_weight": 0.7, "temperature": 0.8, "description": "专业稳重的播报风格", "builtin": True},
-    "故事讲述 (Story)": {"exaggeration": 0.7, "cfg_weight": 0.5, "temperature": 1.1, "description": "生动富有表现力", "builtin": True},
-    "客服助手 (Service)": {"exaggeration": 0.4, "cfg_weight": 0.6, "temperature": 0.9, "description": "友好专业的语气", "builtin": True},
-    "有声书 (Audiobook)": {"exaggeration": 0.5, "cfg_weight": 0.5, "temperature": 1.0, "description": "舒适的朗读风格", "builtin": True},
-    "情感表达 (Emotional)": {"exaggeration": 0.9, "cfg_weight": 0.4, "temperature": 1.2, "description": "强烈的情感表达", "builtin": True},
+    "Default (Balanced)": {"exaggeration": 0.5, "cfg_weight": 0.5, "temperature": 1.0, "description": "Balanced settings, suitable for most scenarios", "builtin": True},
+    "News Broadcast": {"exaggeration": 0.2, "cfg_weight": 0.7, "temperature": 0.8, "description": "Professional and steady broadcast style", "builtin": True},
+    "Storytelling": {"exaggeration": 0.7, "cfg_weight": 0.5, "temperature": 1.1, "description": "Vivid and expressive", "builtin": True},
+    "Customer Service": {"exaggeration": 0.4, "cfg_weight": 0.6, "temperature": 0.9, "description": "Friendly and professional tone", "builtin": True},
+    "Audiobook": {"exaggeration": 0.5, "cfg_weight": 0.5, "temperature": 1.0, "description": "Comfortable reading style", "builtin": True},
+    "Emotional": {"exaggeration": 0.9, "cfg_weight": 0.4, "temperature": 1.2, "description": "Strong emotional expression", "builtin": True},
 }
 
-# ==================== 预设管理 ====================
+# ==================== Preset Manager ====================
 
 
 class PresetManager:
-    """预设管理器"""
+    """Preset manager"""
 
     def __init__(self):
         self._presets = self._load()
 
     def _load(self) -> dict:
-        """加载预设"""
+        """Load presets"""
         presets = DEFAULT_PRESETS.copy()
         if os.path.exists(CONFIG.presets_file):
             try:
@@ -152,7 +152,7 @@ class PresetManager:
         return presets
 
     def _save(self):
-        """保存用户预设（只保存非内置的）"""
+        """Save user presets (only non-builtin ones)"""
         user_presets = {k: v for k, v in self._presets.items()
                         if not v.get("builtin", False)}
         with open(CONFIG.presets_file, 'w', encoding='utf-8') as f:
@@ -168,14 +168,14 @@ class PresetManager:
         return self._presets.get(name)
 
     def add(self, name: str, exaggeration: float, cfg_weight: float, temperature: float, description: str) -> str:
-        """添加新预设"""
+        """Add new preset"""
         if not name or not name.strip():
-            return "❌ 预设名称不能为空"
+            return "❌ Preset name cannot be empty"
 
         name = name.strip()
 
         if name in self._presets and self._presets[name].get("builtin", False):
-            return f"❌ 不能覆盖内置预设 '{name}'"
+            return f"❌ Cannot overwrite builtin preset '{name}'"
 
         self._presets[name] = {
             "exaggeration": exaggeration,
@@ -185,28 +185,28 @@ class PresetManager:
             "builtin": False
         }
         self._save()
-        return f"✅ 预设 '{name}' 已保存"
+        return f"✅ Preset '{name}' saved"
 
     def delete(self, name: str) -> str:
-        """删除预设"""
+        """Delete preset"""
         if name not in self._presets:
-            return f"❌ 预设 '{name}' 不存在"
+            return f"❌ Preset '{name}' does not exist"
 
         if self._presets[name].get("builtin", False):
-            return f"❌ 不能删除内置预设 '{name}'"
+            return f"❌ Cannot delete builtin preset '{name}'"
 
         del self._presets[name]
         self._save()
-        return f"✅ 预设 '{name}' 已删除"
+        return f"✅ Preset '{name}' deleted"
 
 
 preset_manager = PresetManager()
 
-# ==================== 模型管理器 ====================
+# ==================== Model Manager ====================
 
 
 class ModelManager:
-    """双模型管理器"""
+    """Dual model manager"""
 
     def __init__(self):
         self._english_model = None
@@ -221,21 +221,21 @@ class ModelManager:
     def load_english_model(self):
         with self._lock:
             if self._english_model is None:
-                logger.info("加载英文模型...")
+                logger.info("Loading English model...")
                 from chatterbox.tts import ChatterboxTTS
                 self._english_model = ChatterboxTTS.from_pretrained(
                     device=self._device)
-                logger.info("英文模型加载完成")
+                logger.info("English model loaded")
             return self._english_model
 
     def load_multilingual_model(self):
         with self._lock:
             if self._multilingual_model is None:
-                logger.info("加载多语言模型...")
+                logger.info("Loading multilingual model...")
                 from chatterbox.mtl_tts import ChatterboxMultilingualTTS
                 self._multilingual_model = ChatterboxMultilingualTTS.from_pretrained(
                     device=self._device)
-                logger.info("多语言模型加载完成")
+                logger.info("Multilingual model loaded")
             return self._multilingual_model
 
     def generate(
@@ -276,12 +276,12 @@ class ModelManager:
     def get_status(self) -> str:
         en = "✅" if self._english_model else "❌"
         ml = "✅" if self._multilingual_model else "❌"
-        return f"英文: {en} | 多语言: {ml}"
+        return f"English: {en} | Multilingual: {ml}"
 
 
 model_manager = ModelManager()
 
-# ==================== 隐身模式状态 ====================
+# ==================== Incognito Mode State ====================
 incognito_mode = False
 
 
@@ -291,11 +291,11 @@ def set_incognito_mode(enabled: bool) -> str:
     logger.set_incognito(enabled)
 
     if enabled:
-        return "🕵️ 隐身模式已开启\n• 不保存音频文件\n• 不记录历史\n• 不写入日志文件"
+        return "🕵️ Incognito mode enabled\n• Audio files not saved\n• History not recorded\n• Log file not written"
     else:
-        return "👁️ 隐身模式已关闭\n• 正常保存文件和记录"
+        return "👁️ Incognito mode disabled\n• Files and records saved normally"
 
-# ==================== 工具函数 ====================
+# ==================== Utility Functions ====================
 
 
 def ensure_dirs():
@@ -310,15 +310,15 @@ def get_system_info() -> str:
         info.append(f"CUDA: {torch.version.cuda}")
         info.append(f"GPU: {torch.cuda.get_device_name(0)}")
         mem = torch.cuda.get_device_properties(0).total_memory / 1024**3
-        info.append(f"显存: {mem:.1f}GB")
+        info.append(f"VRAM: {mem:.1f}GB")
     else:
-        info.append("⚠️ CPU 模式")
+        info.append("⚠️ CPU Mode")
     return " | ".join(info)
 
 
 def get_gpu_stats() -> str:
     if not torch.cuda.is_available():
-        return "GPU 不可用"
+        return "GPU not available"
     used = torch.cuda.memory_allocated(0) / 1024**3
     total = torch.cuda.get_device_properties(0).total_memory / 1024**3
     pct = (used / total) * 100
@@ -329,25 +329,25 @@ def get_gpu_stats() -> str:
 
 
 def save_audio(audio_np: np.ndarray, sample_rate: int, fmt: str = "wav") -> str:
-    """保存音频 - 隐身模式下返回临时文件"""
+    """Save audio - returns temp file in incognito mode"""
     if incognito_mode:
-        # 隐身模式：使用临时文件
+        # Incognito mode: use temp file
         with tempfile.NamedTemporaryFile(suffix=f".{fmt}", delete=False) as f:
             sf.write(f.name, audio_np, sample_rate)
             return f.name
     else:
-        # 正常模式：保存到 outputs
+        # Normal mode: save to outputs
         ensure_dirs()
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         filename = f"tts_{ts}.{fmt}"
         filepath = os.path.join(CONFIG.output_dir, filename)
         sf.write(filepath, audio_np, sample_rate)
-        logger.info(f"音频已保存: {filepath}")
+        logger.info(f"Audio saved: {filepath}")
         return filepath
 
 
 def save_to_history(text: str, language: str, audio_path: str, params: dict):
-    """保存历史 - 隐身模式下跳过"""
+    """Save history - skipped in incognito mode"""
     if incognito_mode:
         return
 
@@ -378,12 +378,12 @@ def save_to_history(text: str, language: str, audio_path: str, params: dict):
 def get_history_display() -> str:
     history_file = os.path.join(CONFIG.history_dir, "history.json")
     if not os.path.exists(history_file):
-        return "暂无历史记录"
+        return "No history records"
     try:
         with open(history_file, 'r', encoding='utf-8') as f:
             history = json.load(f)
     except:
-        return "暂无历史记录"
+        return "No history records"
 
     lines = []
     for i, r in enumerate(history[:20], 1):
@@ -391,16 +391,16 @@ def get_history_display() -> str:
         txt = r.get("text", "")[:30]
         lang = r.get("language", "")[:8]
         lines.append(f"{i}. [{ts}] {lang} | {txt}")
-    return "\n".join(lines) if lines else "暂无历史记录"
+    return "\n".join(lines) if lines else "No history records"
 
 
 def clear_history() -> str:
     history_file = os.path.join(CONFIG.history_dir, "history.json")
     if os.path.exists(history_file):
         os.remove(history_file)
-    return "✅ 历史已清空"
+    return "✅ History cleared"
 
-# ==================== 核心生成函数 ====================
+# ==================== Core Generation Function ====================
 
 
 def generate_speech(
@@ -419,14 +419,14 @@ def generate_speech(
     start_time = time.time()
 
     if not text or not text.strip():
-        return None, "❌ 请输入文本", get_gpu_stats()
+        return None, "❌ Please enter text", get_gpu_stats()
 
     text = text.strip()
     if len(text) > CONFIG.max_text_length:
-        return None, f"❌ 文本过长 (最大 {CONFIG.max_text_length} 字)", get_gpu_stats()
+        return None, f"❌ Text too long (max {CONFIG.max_text_length} chars)", get_gpu_stats()
 
     try:
-        progress(0.1, desc="准备中...")
+        progress(0.1, desc="Preparing...")
 
         lang_config = LANGUAGES.get(
             language, {"code": "en", "multilingual": False})
@@ -440,8 +440,8 @@ def generate_speech(
                 torch.cuda.manual_seed_all(seed)
             np.random.seed(seed)
 
-        progress(0.3, desc="加载模型...")
-        progress(0.5, desc="生成中...")
+        progress(0.3, desc="Loading model...")
+        progress(0.5, desc="Generating...")
 
         audio_np, sample_rate = model_manager.generate(
             text=text,
@@ -452,7 +452,7 @@ def generate_speech(
             cfg_weight=cfg_weight,
         )
 
-        progress(0.9, desc="保存...")
+        progress(0.9, desc="Saving...")
 
         audio_path = save_audio(audio_np, sample_rate, output_format)
 
@@ -460,43 +460,43 @@ def generate_speech(
         elapsed = time.time() - start_time
         rtf = elapsed / duration
 
-        # 保存历史（隐身模式下跳过）
+        # Save history (skipped in incognito mode)
         save_to_history(text, language, audio_path, {
             "exaggeration": exaggeration,
             "cfg_weight": cfg_weight,
             "seed": seed if not use_random_seed else "random"
         })
 
-        progress(1.0, desc="完成!")
+        progress(1.0, desc="Done!")
 
-        clone_info = " | 🎭 克隆" if reference_audio else ""
-        model_type = "多语言" if use_multilingual else "英文"
-        incognito_info = " | 🕵️ 隐身" if incognito_mode else ""
+        clone_info = " | 🎭 Cloned" if reference_audio else ""
+        model_type = "Multilingual" if use_multilingual else "English"
+        incognito_info = " | 🕵️ Incognito" if incognito_mode else ""
 
         status = (
-            f"✅ 成功!\n"
-            f"⏱️ 时长: {duration:.2f}s | 耗时: {elapsed:.2f}s | RTF: {rtf:.2f}x\n"
-            f"🌍 {flag} {language} | 模型: {model_type}{clone_info}{incognito_info}"
+            f"✅ Success!\n"
+            f"⏱️ Duration: {duration:.2f}s | Time: {elapsed:.2f}s | RTF: {rtf:.2f}x\n"
+            f"🌍 {flag} {language} | Model: {model_type}{clone_info}{incognito_info}"
         )
 
         return audio_path, status, get_gpu_stats()
 
     except Exception as e:
-        logger.error(f"生成失败: {e}", exc_info=True)
-        return None, f"❌ 错误: {str(e)}", get_gpu_stats()
+        logger.error(f"Generation failed: {e}", exc_info=True)
+        return None, f"❌ Error: {str(e)}", get_gpu_stats()
 
 
 def apply_preset(preset_name: str) -> Tuple[float, float, float, str]:
     p = preset_manager.get(preset_name)
     if p:
         desc = p.get("description", "")
-        builtin = "📌 内置" if p.get("builtin") else "👤 自定义"
+        builtin = "📌 Builtin" if p.get("builtin") else "👤 Custom"
         return p.get("exaggeration", 0.5), p.get("cfg_weight", 0.5), p.get("temperature", 1.0), f"{builtin} | {desc}"
-    return 0.5, 0.5, 1.0, "⚠️ 预设不存在"
+    return 0.5, 0.5, 1.0, "⚠️ Preset not found"
 
 
 def save_new_preset(name: str, exaggeration: float, cfg_weight: float, temperature: float, description: str):
-    """保存新预设"""
+    """Save new preset"""
     result = preset_manager.add(
         name, exaggeration, cfg_weight, temperature, description)
     new_choices = preset_manager.get_names()
@@ -504,7 +504,7 @@ def save_new_preset(name: str, exaggeration: float, cfg_weight: float, temperatu
 
 
 def delete_preset(name: str):
-    """删除预设"""
+    """Delete preset"""
     result = preset_manager.delete(name)
     new_choices = preset_manager.get_names()
     return result, gr.update(choices=new_choices)
@@ -512,9 +512,9 @@ def delete_preset(name: str):
 
 def unload_models() -> str:
     model_manager.unload_all()
-    return "✅ 模型已卸载"
+    return "✅ Models unloaded"
 
-# ==================== Gradio 界面 ====================
+# ==================== Gradio Interface ====================
 
 
 def create_app():
@@ -531,22 +531,22 @@ def create_app():
 
     with gr.Blocks(title=CONFIG.app_name, theme=gr.themes.Soft(), css=css) as app:
 
-        # 标题
+        # Title
         gr.HTML(f"""
         <div class="main-title">🎙️ {CONFIG.app_name}</div>
-        <div class="subtitle">多语言语音合成 · 语音克隆 · 情感控制 | v{CONFIG.version}</div>
+        <div class="subtitle">Multilingual TTS · Voice Cloning · Emotion Control | v{CONFIG.version}</div>
         """)
 
-        # 系统状态栏
+        # System status bar
         with gr.Row():
             gr.Markdown(f"**{get_system_info()}**")
             gpu_status = gr.Textbox(value=get_gpu_stats(
             ), label="GPU", interactive=False, scale=1)
             refresh_btn = gr.Button("🔄", scale=0, min_width=50)
 
-            # 隐身模式开关
+            # Incognito mode toggle
             incognito_toggle = gr.Checkbox(
-                label="🕵️ 隐身模式", value=False, scale=0)
+                label="🕵️ Incognito Mode", value=False, scale=0)
 
         incognito_status = gr.Textbox(
             value="", label="", interactive=False, visible=False)
@@ -554,103 +554,105 @@ def create_app():
         gr.Markdown("---")
 
         with gr.Tabs():
-            # ===== 语音生成 =====
-            with gr.TabItem("🎵 语音生成"):
+            # ===== Speech Generation =====
+            with gr.TabItem("🎵 Speech Generation"):
                 with gr.Row():
-                    # 左栏
+                    # Left column
                     with gr.Column(scale=1):
                         text_input = gr.Textbox(
-                            label="📝 输入文本", placeholder="请输入要合成的文本...", lines=8)
+                            label="📝 Input Text", placeholder="Enter text to synthesize...", lines=8)
 
                         with gr.Row():
                             language = gr.Dropdown(choices=list(
-                                LANGUAGES.keys()), value="English (英语)", label="🌍 语言", scale=2)
+                                LANGUAGES.keys()), value="English", label="🌍 Language", scale=2)
                             output_format = gr.Radio(
-                                choices=["wav", "mp3"], value="wav", label="格式", scale=1)
+                                choices=["wav", "mp3"], value="wav", label="Format", scale=1)
 
-                        gr.Markdown("#### 🎭 语音克隆（可选）")
+                        gr.Markdown("#### 🎭 Voice Cloning (Optional)")
                         reference_audio = gr.Audio(
-                            label="参考音频 (5-15秒)", type="filepath", sources=["upload", "microphone"])
+                            label="Reference Audio (5-15 sec)", type="filepath", sources=["upload", "microphone"])
 
-                    # 右栏
+                    # Right column
                     with gr.Column(scale=1):
-                        gr.Markdown("#### ⚙️ 参数设置")
+                        gr.Markdown("#### ⚙️ Parameter Settings")
 
                         preset_select = gr.Dropdown(
-                            choices=preset_manager.get_names(), value="默认 (Balanced)", label="📋 预设")
+                            choices=preset_manager.get_names(), value="Default (Balanced)", label="📋 Preset")
                         preset_info = gr.Textbox(
                             label="", interactive=False, lines=1)
 
                         exaggeration = gr.Slider(
-                            0.0, 1.0, 0.5, step=0.05, label="🎭 情感夸张度", info="0=平淡, 1=夸张")
+                            0.0, 1.0, 0.5, step=0.05, label="🎭 Emotion Exaggeration", info="0=Flat, 1=Exaggerated")
                         cfg_weight = gr.Slider(
-                            0.0, 1.0, 0.5, step=0.05, label="🎯 CFG 权重", info="控制对参考音频的遵循程度")
+                            0.0, 1.0, 0.5, step=0.05, label="🎯 CFG Weight", info="Controls adherence to reference audio")
                         temperature = gr.Slider(
-                            0.1, 2.0, 1.0, step=0.1, label="🌡️ 温度")
+                            0.1, 2.0, 1.0, step=0.1, label="🌡️ Temperature")
 
                         with gr.Row():
                             seed = gr.Number(
-                                value=42, label="🎲 种子", precision=0, scale=2)
+                                value=42, label="🎲 Seed", precision=0, scale=2)
                             use_random_seed = gr.Checkbox(
-                                value=True, label="随机", scale=1)
+                                value=True, label="Random", scale=1)
 
                 generate_btn = gr.Button(
-                    "🚀 生成语音", variant="primary", size="lg")
+                    "🚀 Generate Speech", variant="primary", size="lg")
 
                 with gr.Row():
                     output_audio = gr.Audio(
-                        label="🔊 结果", type="filepath", scale=2)
+                        label="🔊 Result", type="filepath", scale=2)
                     status_output = gr.Textbox(
-                        label="📊 状态", lines=4, interactive=False, scale=1)
+                        label="📊 Status", lines=4, interactive=False, scale=1)
 
-                # 示例
-                gr.Markdown("#### 📚 示例")
+                # Examples
+                gr.Markdown("#### 📚 Examples")
                 gr.Examples(
                     examples=[
-                        ["Hello! Welcome to Chatterbox TTS.", "English (英语)"],
-                        ["你好！欢迎使用语音合成系统。", "中文 (Chinese)"],
-                        ["こんにちは！音声合成へようこそ。", "日本語 (Japanese)"],
-                        ["Bonjour! Bienvenue!", "Français (French)"],
+                        ["Hello! Welcome to Chatterbox TTS.", "English"],
+                        ["你好！欢迎使用语音合成系统。", "Chinese (中文)"],
+                        ["こんにちは！音声合成へようこそ。", "Japanese (日本語)"],
+                        ["Bonjour! Bienvenue!", "French (Français)"],
                     ],
                     inputs=[text_input, language]
                 )
 
-            # ===== 预设管理 =====
-            with gr.TabItem("📋 预设管理"):
-                gr.Markdown("### 自定义预设")
-                gr.Markdown("创建自己的参数预设，方便快速切换不同风格。")
+            # ===== Preset Management =====
+            with gr.TabItem("📋 Preset Management"):
+                gr.Markdown("### Custom Presets")
+                gr.Markdown(
+                    "Create your own parameter presets for quick style switching.")
 
                 with gr.Row():
                     with gr.Column():
-                        gr.Markdown("#### ➕ 新建预设")
+                        gr.Markdown("#### ➕ Create New Preset")
                         new_preset_name = gr.Textbox(
-                            label="预设名称", placeholder="例如: 我的风格")
+                            label="Preset Name", placeholder="e.g., My Style")
                         new_preset_desc = gr.Textbox(
-                            label="描述", placeholder="例如: 适合朗读诗歌")
+                            label="Description", placeholder="e.g., Suitable for reading poetry")
 
                         with gr.Row():
                             new_exaggeration = gr.Slider(
-                                0.0, 1.0, 0.5, step=0.05, label="情感夸张度")
+                                0.0, 1.0, 0.5, step=0.05, label="Emotion Exaggeration")
                             new_cfg = gr.Slider(
-                                0.0, 1.0, 0.5, step=0.05, label="CFG 权重")
+                                0.0, 1.0, 0.5, step=0.05, label="CFG Weight")
                             new_temp = gr.Slider(
-                                0.1, 2.0, 1.0, step=0.1, label="温度")
+                                0.1, 2.0, 1.0, step=0.1, label="Temperature")
 
                         save_preset_btn = gr.Button(
-                            "💾 保存预设", variant="primary")
+                            "💾 Save Preset", variant="primary")
                         save_preset_result = gr.Textbox(
-                            label="结果", interactive=False)
+                            label="Result", interactive=False)
 
                     with gr.Column():
-                        gr.Markdown("#### 🗑️ 删除预设")
+                        gr.Markdown("#### 🗑️ Delete Preset")
                         delete_preset_select = gr.Dropdown(
-                            choices=preset_manager.get_names(), label="选择要删除的预设")
-                        delete_preset_btn = gr.Button("🗑️ 删除", variant="stop")
+                            choices=preset_manager.get_names(), label="Select preset to delete")
+                        delete_preset_btn = gr.Button(
+                            "🗑️ Delete", variant="stop")
                         delete_preset_result = gr.Textbox(
-                            label="结果", interactive=False)
+                            label="Result", interactive=False)
 
                         gr.Markdown("---")
-                        gr.Markdown("#### 📜 当前预设列表")
+                        gr.Markdown("#### 📜 Current Preset List")
                         preset_list = gr.Textbox(
                             value="\n".join([f"{'📌' if p.get('builtin') else '👤'} {k}: {p.get('description', '')}"
                                              for k, p in preset_manager.get_all().items()]),
@@ -659,58 +661,58 @@ def create_app():
                             interactive=False
                         )
 
-            # ===== 历史记录 =====
-            with gr.TabItem("📜 历史记录"):
+            # ===== History =====
+            with gr.TabItem("📜 History"):
                 history_display = gr.Textbox(
-                    value=get_history_display(), label="最近记录", lines=15, interactive=False)
+                    value=get_history_display(), label="Recent Records", lines=15, interactive=False)
                 with gr.Row():
-                    refresh_history_btn = gr.Button("🔄 刷新")
-                    clear_history_btn = gr.Button("🗑️ 清空", variant="stop")
-                history_status = gr.Textbox(label="状态", interactive=False)
+                    refresh_history_btn = gr.Button("🔄 Refresh")
+                    clear_history_btn = gr.Button("🗑️ Clear", variant="stop")
+                history_status = gr.Textbox(label="Status", interactive=False)
 
-            # ===== 系统设置 =====
-            with gr.TabItem("⚙️ 系统"):
+            # ===== System Settings =====
+            with gr.TabItem("⚙️ System"):
                 with gr.Row():
                     with gr.Column():
-                        gr.Markdown("### 🕵️ 隐身模式说明")
+                        gr.Markdown("### 🕵️ Incognito Mode Info")
                         gr.Markdown("""
-                        开启隐身模式后：
-                        - ❌ 不保存生成的音频文件到 outputs 目录
-                        - ❌ 不记录历史
-                        - ❌ 不写入日志文件
-                        - ✅ 音频仍可播放和下载（临时文件）
+                        When incognito mode is enabled:
+                        - ❌ Generated audio not saved to outputs directory
+                        - ❌ History not recorded
+                        - ❌ Log file not written
+                        - ✅ Audio can still be played and downloaded (temp file)
                         
-                        适合处理敏感内容时使用。
+                        Suitable for processing sensitive content.
                         """)
 
                     with gr.Column():
-                        gr.Markdown("### 模型管理")
+                        gr.Markdown("### Model Management")
                         model_status = gr.Textbox(
-                            value=model_manager.get_status(), label="模型状态", interactive=False)
-                        unload_btn = gr.Button("🔓 卸载模型（释放显存）")
+                            value=model_manager.get_status(), label="Model Status", interactive=False)
+                        unload_btn = gr.Button("🔓 Unload Models (Free VRAM)")
                         unload_result = gr.Textbox(
-                            label="结果", interactive=False)
+                            label="Result", interactive=False)
 
                 gr.Markdown("---")
                 gr.Markdown(f"""
-                ### 关于
+                ### About
                 **{CONFIG.app_name}** v{CONFIG.version}
                 
-                基于 [Chatterbox](https://github.com/resemble-ai/chatterbox) | MIT License
+                Based on [Chatterbox](https://github.com/resemble-ai/chatterbox) | MIT License
                 """)
 
-        # ===== 事件绑定 =====
+        # ===== Event Bindings =====
         refresh_btn.click(fn=lambda: get_gpu_stats(), outputs=[gpu_status])
 
-        # 隐身模式
+        # Incognito mode
         incognito_toggle.change(fn=set_incognito_mode, inputs=[
                                 incognito_toggle], outputs=[incognito_status])
 
-        # 预设
+        # Preset
         preset_select.change(fn=apply_preset, inputs=[preset_select], outputs=[
                              exaggeration, cfg_weight, temperature, preset_info])
 
-        # 生成
+        # Generate
         generate_btn.click(
             fn=generate_speech,
             inputs=[text_input, language, reference_audio, exaggeration,
@@ -718,7 +720,7 @@ def create_app():
             outputs=[output_audio, status_output, gpu_status]
         )
 
-        # 保存预设
+        # Save preset
         save_preset_btn.click(
             fn=save_new_preset,
             inputs=[new_preset_name, new_exaggeration,
@@ -726,32 +728,32 @@ def create_app():
             outputs=[save_preset_result, preset_select]
         )
 
-        # 删除预设
+        # Delete preset
         delete_preset_btn.click(
             fn=delete_preset,
             inputs=[delete_preset_select],
             outputs=[delete_preset_result, preset_select]
         )
 
-        # 历史
+        # History
         refresh_history_btn.click(
             fn=get_history_display, outputs=[history_display])
         clear_history_btn.click(fn=clear_history, outputs=[history_status])
 
-        # 卸载模型
+        # Unload models
         unload_btn.click(fn=unload_models, outputs=[unload_result])
 
     return app
 
 
-# ==================== 主程序 ====================
+# ==================== Main Program ====================
 if __name__ == "__main__":
     print("\n" + "=" * 60)
     print(f"🎙️  {CONFIG.app_name} v{CONFIG.version}")
     print("=" * 60)
     print(get_system_info())
     print("=" * 60)
-    print("\n🚀 启动中...\n")
+    print("\n🚀 Starting...\n")
 
     app = create_app()
     app.launch(
